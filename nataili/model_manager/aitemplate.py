@@ -175,4 +175,3 @@ class AITemplateModelManager(BaseModelManager):
             filter_nsfw=False,
         ).to("cuda")
         return ait
-        

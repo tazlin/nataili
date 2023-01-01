@@ -24,14 +24,11 @@ import zipfile
 from pathlib import Path
 from uuid import uuid4
 
-from transformers import logging
-
-logging.set_verbosity_error()
-
 import git
 import requests
 import torch
 from tqdm import tqdm
+from transformers import logging
 
 from ..util import logger
 
@@ -39,6 +36,8 @@ if sys.version_info < (3, 9):
     import importlib_resources
 else:
     import importlib.resources as importlib_resources
+
+logging.set_verbosity_error()
 
 
 class BaseModelManager:
@@ -139,7 +138,6 @@ class BaseModelManager:
             del self.loaded_models[model]
         return True
 
-
     def taint_model(self, model_name):
         """Marks a model as not valid by remiving it from available_models"""
         if model_name in self.available_models:
@@ -149,7 +147,6 @@ class BaseModelManager:
     def taint_models(self, models):
         for model in models:
             self.taint_model(model)
-
 
     def validate_model(self, model_name, skip_checksum=False):
         """

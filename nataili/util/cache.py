@@ -17,11 +17,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import gc
 
-gc.enable()
-
 import torch
 
 with torch.no_grad():
+
     def torch_gc():
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()

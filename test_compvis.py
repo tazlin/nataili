@@ -1,11 +1,8 @@
-import argparse
-import time
 import uuid
 
 import PIL
 
 from nataili import CompVis, ModelManager, logger
-
 
 init_image = PIL.Image.open("./01.png").convert("RGB")
 

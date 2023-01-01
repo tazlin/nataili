@@ -6,17 +6,17 @@ Allows device to be specified. NOTE: Device selection seems funky, high CPU usag
 Uses modified FaceRestoreHelper.
 """
 import cv2
-from PIL import Image
 import numpy as np
 import torch
-from torchvision.transforms.functional import normalize
-from basicsr.utils import img2tensor, tensor2img
-from .face_restoration_helper import FaceRestoreHelper
-from codeformer.facelib.utils.misc import is_gray
 from basicsr.archs.rrdbnet_arch import RRDBNet
-from realesrgan import RealESRGANer
-
+from basicsr.utils import img2tensor, tensor2img
 from basicsr.utils.registry import ARCH_REGISTRY
+from codeformer.facelib.utils.misc import is_gray
+from PIL import Image
+from realesrgan import RealESRGANer
+from torchvision.transforms.functional import normalize
+
+from .face_restoration_helper import FaceRestoreHelper
 
 
 class CodeFormer(torch.nn.Module):
@@ -93,7 +93,7 @@ class CodeFormer(torch.nn.Module):
             save_ext="png",
             use_parse=True,
             device=device,
-            model_rootpath=gfpgan_model_manager.path, # GFPGAN uses the same FaceRestoreHelper models
+            model_rootpath=gfpgan_model_manager.path,  # GFPGAN uses the same FaceRestoreHelper models
         )
 
     @property
@@ -125,9 +125,7 @@ class CodeFormer(torch.nn.Module):
         else:
             self.face_helper.read_image(img)
             # get face landmarks for each face
-            num_det_faces = self.face_helper.get_face_landmarks_5(
-                only_center_face=only_center_face, resize=640, eye_dist_threshold=5
-            )
+            self.face_helper.get_face_landmarks_5(only_center_face=only_center_face, resize=640, eye_dist_threshold=5)
             self.face_helper.align_warp_face()
 
         # face restoration for each cropped face

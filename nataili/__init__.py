@@ -1,7 +1,9 @@
 from .blip import Caption
 from .clip import Interrogator
+from .codeformers import codeformers
+from .esrgan import esrgan
+from .gfpgan import gfpgan
 from .model_manager import (
-    ModelManager,
     AITemplateModelManager,
     BlipModelManager,
     ClipModelManager,
@@ -9,13 +11,10 @@ from .model_manager import (
     CompVisModelManager,
     EsrganModelManager,
     GfpganModelManager,
+    ModelManager,
 )
-from .util import logger
-from .gfpgan import gfpgan
-from .esrgan import esrgan
-from .codeformers import codeformers
-from .util import Switch
 from .stable_diffusion import CompVis
+from .util import Switch, logger
 
 disable_xformers = Switch()
 disable_voodoo = Switch()

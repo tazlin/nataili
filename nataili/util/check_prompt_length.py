@@ -15,6 +15,8 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+
+
 def check_prompt_length(model, prompt, comments):
     """this function tests if prompt is too long, and if so, adds a message to comments"""
 

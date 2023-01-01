@@ -23,8 +23,9 @@ if sys.version_info < (3, 9):
 else:
     import importlib.resources as importlib_resources
 
-import torch
 import time
+
+import torch
 
 from ..util import blip_decoder, logger
 from .base import BaseModelManager
@@ -46,11 +47,11 @@ class BlipModelManager(BaseModelManager):
         blip_image_eval_size=512,
     ):
         """
-            model_name: str. Name of the model to load. See available_models for a list of available models.
-            half_precision: bool. If True, the model will be loaded in half precision.
-            gpu_id: int. The id of the gpu to use. If the gpu is not available, the model will be loaded on the cpu.
-            cpu_only: bool. If True, the model will be loaded on the cpu. If True, half_precision will be set to False.
-            blip_image_eval_size: int. The size of the image to use for the blip model.
+        model_name: str. Name of the model to load. See available_models for a list of available models.
+        half_precision: bool. If True, the model will be loaded in half precision.
+        gpu_id: int. The id of the gpu to use. If the gpu is not available, the model will be loaded on the cpu.
+        cpu_only: bool. If True, the model will be loaded on the cpu. If True, half_precision will be set to False.
+        blip_image_eval_size: int. The size of the image to use for the blip model.
         """
         if model_name not in self.models:
             logger.error(f"{model_name} not found")

@@ -1,7 +1,8 @@
-import PIL
 import time
 
-from nataili import codeformers, ModelManager, logger
+import PIL
+
+from nataili import ModelManager, codeformers, logger
 
 image = PIL.Image.open("01.png").convert("RGB")
 
@@ -17,4 +18,3 @@ for iter in range(5):
     tick = time.time()
     results = upscaler(input_image=image)
     logger.init_ok(f"Job Completed. Took {time.time() - tick} seconds", status="Success")
-

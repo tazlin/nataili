@@ -1,7 +1,8 @@
-import PIL
 import time
 
-from nataili import esrgan, ModelManager, logger
+import PIL
+
+from nataili import ModelManager, esrgan, logger
 
 image = PIL.Image.open("01.png").convert("RGB")
 
