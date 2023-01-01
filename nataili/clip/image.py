@@ -22,7 +22,7 @@ import numpy as np
 import torch
 
 from nataili.cache import Cache
-from nataili.util import logger, autocast_cuda
+from nataili.util import autocast_cuda, logger
 
 
 class ImageEmbed:
