@@ -29,7 +29,7 @@ class ModelManager:
         self.aitemplate = AITemplateModelManager()
         self.blip = BlipModelManager()
         self.clip = ClipModelManager()
-        self.codeformer = CodeFormerModelManager(self.gfpgan, self.esrgan)
         self.compvis = CompVisModelManager()
         self.esrgan = EsrganModelManager()
         self.gfpgan = GfpganModelManager()
+        self.codeformer = CodeFormerModelManager(self.gfpgan, self.esrgan)
