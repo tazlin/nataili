@@ -22,7 +22,7 @@ import numpy as np
 import torch
 
 from nataili.cache import Cache
-from nataili.util import logger
+from nataili.util import logger, autocast_cuda
 
 
 class ImageEmbed:
@@ -34,6 +34,7 @@ class ImageEmbed:
         self.model = model
         self.cache = cache
 
+    @autocast_cuda
     def __call__(self, pil_image):
         """
         :param pil_image: PIL image to embed
@@ -48,7 +49,7 @@ class ImageEmbed:
         logger.info(f"Embedding image {image_hash}")
         with torch.no_grad():
             preprocess_image = self.model["preprocess"](pil_image).unsqueeze(0).to(self.model["device"])
-            image_features = self.model["model"].encode_image(preprocess_image).float()
+        image_features = self.model["model"].encode_image(preprocess_image).float()
         image_features /= image_features.norm(dim=-1, keepdim=True)
         image_embed_array = image_features.cpu().detach().numpy()
         filename = str(uuid4())

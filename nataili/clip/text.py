@@ -22,6 +22,7 @@ import numpy as np
 import torch
 
 from nataili.cache import Cache
+from nataili.util import autocast_cuda
 
 
 class TextEmbed:
@@ -33,6 +34,7 @@ class TextEmbed:
         self.model = model
         self.cache = cache
 
+    @autocast_cuda
     def __call__(self, text):
         """
         :param text: Text to embed
