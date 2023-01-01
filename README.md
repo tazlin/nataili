@@ -30,7 +30,9 @@ pip install -e .
 #### Model manager
 
 Nataili has a model manager that allows you to download and manage models. You can use it to download models, list models, and remove models.
+
 Each service has a set of models that can be used. You can use the model manager to download the models you need.
+
 The models for a service are stored in a .json file. These files are included in the package.
 
 Models will be downloaded to the `~/.cache/nataili` directory. The models are stored in a directory named after the service.
@@ -74,20 +76,26 @@ Structure of a model file:
 * `available`: Whether the model is available or not, model manager will set this to true if the model is downloaded
 
 There is a BaseModelManager class that has the basic functionality to manage models. You can use this class to create your own model manager for a service.
+
 BaseModelManager functionality includes:
+
 * Downloading models
 * Listing models
 * Validating models
 * CUDA support detection
 
 Service ModelManager classes inherit from BaseModelManager and add functionality specific to the service. Generally speaking, Service ModelManager classes will have functionality to load the model.
+
 This is done with a `load()` function and a `load_<service>()` function. The `load()` function will call the `load_<service>()` function.
 `load()` is the external function that is called by the user, and `load_<service>()` is the internal function that is called by `load()`.
+
 `load_<service>()` will load the model and return it. `load()` will then store the model in `self.loaded_models` under the model key.
+
 `nataili/model_manager/new.py` can be used as a template for creating a new model manager.
 
 There is a Super ModelManager class that wraps the service ModelManager classes. This class is used to load models from multiple services.
 The individual service ModelManager classes are stored in `self.<service>`.
+
 Accessing the service ModelManager classes is done through `self.<service>.<function>`.
 
 #### Model manager usage
@@ -114,8 +122,10 @@ model_manager.<service>.load(<model_key>)
 #### Service Classes
 
 Service classes are used to interact with the models.
+
 Service classes accept a loaded model as an argument. The model can be loaded with the model manager.
-Service classes are used with the __call__ function. The __call__ function accepts the input and returns the output.
+
+Service classes are used with the `__call__` function. The `__call__` function accepts the input and returns the output.
 
 #### Utils
 
@@ -166,6 +176,7 @@ CLIP (Contrastive Language-Image Pre-training). [arxiv](https://arxiv.org/abs/21
 CLIP can be used to interrogate images. This means you can compare text to images and get a score for how similar they are.
 
 Text embeds are cached to speed up the process.
+
 Image embeds are cached to speed up the process.
 
 Models:
