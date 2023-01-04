@@ -59,6 +59,9 @@ class BaseModelManager:
                 models_available.append(model)
         self.available_models = models_available
 
+    def get_model(self, model_name):
+        return self.models.get(model_name)
+
     def get_model_files(self, model_name):
         """
         :param model_name: Name of the model
@@ -276,30 +279,18 @@ class BaseModelManager:
             if "file_content" in download[i]:
                 file_content = download[i]["file_content"]
                 logger.info(f"writing {file_content} to {file_path}")
-                os.makedirs(download_path, exist_ok=True)
-                with open(os.path.join(download_path, download_name), "w") as f:
+                os.makedirs(os.path.join(self.path, download_path), exist_ok=True)
+                with open(os.path.join(self.path, os.path.join(download_path, download_name)), "w") as f:
                     f.write(file_content)
             elif "symlink" in download[i]:
                 logger.info(f"symlink {file_path} to {download[i]['symlink']}")
                 symlink = download[i]["symlink"]
-                os.makedirs(download_path, exist_ok=True)
-                os.symlink(symlink, os.path.join(download_path, download_name))
+                os.makedirs(os.path.join(self.path, download_path), exist_ok=True)
+                os.symlink(symlink, os.path.join(self.path, os.path.join(download_path, download_name)))
             elif "git" in download[i]:
                 logger.info(f"git clone {download_url} to {file_path}")
-                os.makedirs(file_path, exist_ok=True)
-                git.Git(file_path).clone(download_url)
-                if "post_process" in download[i]:
-                    for post_process in download[i]["post_process"]:
-                        if "delete" in post_process:
-                            logger.info(f"delete {post_process['delete']}")
-                            try:
-                                shutil.rmtree(post_process["delete"])
-                            except PermissionError as e:
-                                logger.error(
-                                    f"[!] Something went wrong while deleting the `{post_process['delete']}`. "
-                                    "Please delete it manually."
-                                )
-                                logger.error("PermissionError: ", e)
+                os.makedirs(os.path.join(self.path, file_path), exist_ok=True)
+                git.Git(os.path.join(self.path, file_path)).clone(download_url)
             elif "unzip" in download[i]:
                 zip_path = f"{self.path}/{download_name}.zip"
                 temp_path = f"{self.path}/{str(uuid4())}/"
@@ -309,7 +300,7 @@ class BaseModelManager:
                 with zipfile.ZipFile(zip_path, "r") as zip_ref:
                     zip_ref.extractall(temp_path)
                 logger.info(f"moving {temp_path} to {download_path}")
-                shutil.move(temp_path, download_path)
+                shutil.move(temp_path, os.path.join(self.path, download_path))
                 logger.info(f"delete {zip_path}")
                 os.remove(zip_path)
                 logger.info(f"delete {temp_path}")

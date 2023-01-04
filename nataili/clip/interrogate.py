@@ -17,6 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import numpy as np
 import torch
+from typing import List, Tuple, Union, Dict
+import math
 
 from nataili.cache import Cache
 from nataili.util import logger
@@ -37,114 +39,124 @@ class Interrogator:
         self.cache = Cache(self.model["cache_name"], cache_parentname="embeds", cache_subname="text")
         self.cache_image = Cache(self.model["cache_name"], cache_parentname="embeds", cache_subname="image")
         self.embed_lists = {}
-        for k in self.model["data_lists"].keys():
-            cached = True
-            for text in self.model["data_lists"][k]:
-                if text not in self.cache.kv:
-                    cached = False
-                    break
-            if not cached:
-                logger.info(f"Caching {k} embeds")
-                text_embed = TextEmbed(self.model, self.cache)
-                for text in self.model["data_lists"][k]:
-                    text_embed(text)
-                self.cache.flush()
-            else:
-                logger.debug(f"{k} embeds already cached")
-            logger.debug(f"Loading {k} embeds")
+    
+    def load(self, key: str, text_array: List[str], individual: bool = True):
+        """
+        :param key: Key to use for embed_lists
+        :param text_array: List of text to embed
+        """
+        cached = True
+        for text in text_array:
+            if text not in self.cache.kv:
+                cached = False
+                break
+        if not cached:
+            # logger.info(f"Caching {key} embeds")
+            text_embed = TextEmbed(self.model, self.cache)
+            for text in text_array:
+                text_embed(text)
+            self.cache.flush()
+        else:
+            logger.debug(f"{key} embeds already cached")
+        logger.debug(f"Loading {key} embeds")
+        if individual:
+            self.embed_lists[key] = {}
+            for text in text_array:
+                self.embed_lists[key][text] = torch.from_numpy(np.load(f"{self.cache.cache_dir}/{self.cache.kv[text]}.npy")).float()
+        else:
             with torch.no_grad():
                 text_features = torch.cat(
                     [
                         torch.from_numpy(np.load(f"{self.cache.cache_dir}/{self.cache.kv[text]}.npy")).float()
-                        for text in self.model["data_lists"][k]
+                        for text in text_array
                     ],
                     dim=0,
                 )
             text_features /= text_features.norm(dim=-1, keepdim=True)
-            self.embed_lists[k] = text_features
+            self.embed_lists[key] = text_features
 
-    def rank(self, image_features, text_array_key, device, top_count=2):
+    def _similarity(self, image_features, text_features):
         """
         :param image_features: Image features to compare to text features
-        :param text_array_key: Key in model["data_lists"].
-            Key is used to get text features from cache.
+        :param text_features: Text features to compare to image features
+        :return: Similarity between text and image
+        """
+        return text_features @ image_features.T
+
+    def similarity(self, image_features, text_array, key, device):
+        """
+        :param image_features: Image features to compare to text features
+        :param text_features: Text features to compare to image features
+        :param device: Device to run on
+        :return: Similarity between image and text
+        """
+        if key not in self.embed_lists:
+            self.load(key, text_array, individual=True)
+        similarity = {}
+        for text in text_array:
+            text_features = self.embed_lists[key][text].to(device)
+            similarity[text] = round(self._similarity(image_features, text_features)[0][0].item(), 4)
+        return similarity
+
+    def rank(self, image_features, text_array, key, device, top_count=2):
+        """
+        :param image_features: Image features to compare to text features
+        :param text_array: List of text to compare to image
         :param device: Device to run on
         :param top_count: Number of top results to return
         :return: List of tuples of (text, similarity)
         """
-        top_count = min(top_count, len(self.model["data_lists"][text_array_key]))
-        text_features = self.embed_lists[text_array_key].to(device)
+        top_count = min(top_count, len(text_array))
+        if key not in self.embed_lists:
+            self.load(key, text_array)
+        text_features = self.embed_lists[key].to(device)
 
-        similarity = torch.zeros((1, len(self.model["data_lists"][text_array_key]))).to(device)
+        similarity = torch.zeros((1, len(text_array))).to(device)
         for i in range(image_features.shape[0]):
             similarity += (100.0 * image_features[i].unsqueeze(0) @ text_features.T).softmax(dim=-1)
         similarity /= image_features.shape[0]
 
         top_probs, top_labels = similarity.cpu().topk(top_count, dim=-1)
-        return [
-            (self.model["data_lists"][text_array_key][top_labels[0][i].numpy()], (top_probs[0][i].numpy() * 100))
+        top = [
+            (text_array[top_labels[0][i].numpy()], (top_probs[0][i].numpy() * 100))
             for i in range(top_count)
         ]
+        return top
 
-    def __call__(self, input_image):
+    def __call__(self,
+     input_image,
+     text_array: Union[List[str], Dict[str, List[str]], None] = None,
+     similarity=False,
+     rank=False,
+     top_count=2):
         """
         :param input_image: PIL image
+        :param text_array: List of text to compare to image, or dict of lists of text to compare to image
+        :param top_count: Number of top results to return
         :return: List of lists of tuples of (text, similarity)
-        Input image is embedded and cached, then compared to all text features in model["data_lists"].
+        Input image is embedded and cached
+        text_array is embedded and cached
+        Image and text are compared and ranked
+        If text_array is None, uses default text_array from model["data_lists"]
         """
+        if not similarity and not rank:
+            logger.error("Must specify similarity or rank")
+            return
+        if text_array is None:
+            text_array = self.model["data_lists"]
+        if isinstance(text_array, list):
+            text_array = {"default": text_array}
         image_embed = ImageEmbed(self.model, self.cache_image)
         image_hash = image_embed(input_image)
         self.cache_image.flush()
         image_embed_array = np.load(f"{self.cache_image.cache_dir}/{self.cache_image.kv[image_hash]}.npy")
         image_features = torch.from_numpy(image_embed_array).float().to(self.model["device"])
-        ranks = []
-        bests = [[("", 0)]] * 7
-        logger.info("Ranking text")
-        ranks.append(self.rank(image_features, "mediums", self.model["device"]))
-        ranks.append(self.rank(image_features, "flavors", self.model["device"]))
-        ranks.append(self.rank(image_features, "artists", self.model["device"]))
-        ranks.append(self.rank(image_features, "movements", self.model["device"]))
-        ranks.append(self.rank(image_features, "sites", self.model["device"]))
-        ranks.append(self.rank(image_features, "techniques", self.model["device"]))
-        ranks.append(self.rank(image_features, "tags", self.model["device"]))
-        logger.info("Sorting text")
-        for i in range(len(ranks)):
-            confidence_sum = 0
-            for ci in range(len(ranks[i])):
-                confidence_sum += ranks[i][ci][1]
-            if confidence_sum > sum(bests[i][t][1] for t in range(len(bests[i]))):
-                bests[i] = ranks[i]
-
-        for best in bests:
-            best.sort(key=lambda x: x[1], reverse=True)
-
-        medium = []
-        for m in bests[0][:1]:
-            medium.append({"text": m[0], "confidence": m[1]})
-        artist = []
-        for a in bests[1][:2]:
-            artist.append({"text": a[0], "confidence": a[1]})
-        trending = []
-        for t in bests[2][:2]:
-            trending.append({"text": t[0], "confidence": t[1]})
-        movement = []
-        for m in bests[3][:2]:
-            movement.append({"text": m[0], "confidence": m[1]})
-        flavors = []
-        for f in bests[4][:2]:
-            flavors.append({"text": f[0], "confidence": f[1]})
-        techniques = []
-        for t in bests[5][:2]:
-            techniques.append({"text": t[0], "confidence": t[1]})
-        tags = []
-        for t in bests[6][:2]:
-            tags.append({"text": t[0], "confidence": t[1]})
-        return {
-            "medium": medium,
-            "artist": artist,
-            "trending": trending,
-            "movement": movement,
-            "flavors": flavors,
-            "techniques": techniques,
-            "tags": tags,
-        }
+        if similarity and not rank:
+            return self.similarity(image_features, text_array["default"], "default", self.model["device"])
+        elif rank and not similarity:
+            return [self.rank(image_features, text_array[k], k, self.model["device"], top_count) for k in text_array.keys()]
+        else:
+            return {
+                'similarity': self.similarity(image_features, text_array["default"], "default", self.model["device"]),
+                'rank': [self.rank(image_features, text_array[k], k, self.model["device"], top_count) for k in text_array.keys()]
+            }
