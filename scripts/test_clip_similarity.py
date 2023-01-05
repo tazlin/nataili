@@ -12,8 +12,6 @@ for file in os.listdir(directory):
     pil_image = PIL.Image.open(f"{directory}/{file}").convert("RGB")
     images.append({"pil_image": pil_image, "filename": file})
 
-# images.append({"pil_image": PIL.Image.open("teeth/00010-39_k_euler_2969534069.png").convert("RGB"), "filename": "00010-39_k_euler_2969534069.png"})
-
 mm = ModelManager()
 
 mm.clip.load("ViT-L/14")
@@ -57,8 +55,7 @@ html_string = ""
 
 
 for image in images:
-    results = interrogator(image['pil_image'], word_list, top_count=5)
-    # write html with results
+    results = interrogator(image['pil_image'], word_list, top_count=5, similarity=True)
     html_string += f"""
     <h1>{image['filename']}</h1>
     <img src="{directory}/{image['filename']}" width="300" />
@@ -80,4 +77,3 @@ for image in images:
 
 with open("test.html", "w") as f:
     f.write(html_string)
-

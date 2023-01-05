@@ -19,6 +19,7 @@ import numpy as np
 import torch
 from typing import List, Tuple, Union, Dict
 import math
+from PIL import Image
 
 from nataili.cache import Cache
 from nataili.util import logger
@@ -44,6 +45,9 @@ class Interrogator:
         """
         :param key: Key to use for embed_lists
         :param text_array: List of text to embed
+        :param individual: Whether to store each text embed individually or as a concatenated tensor
+        If individual is True, self.embed_lists[key] will be a dict with text as key and embed as value.
+        If individual is False, self.embed_lists[key] will be a tensor of all text embeds concatenated.
         """
         cached = True
         for text in text_array:
@@ -77,6 +81,7 @@ class Interrogator:
 
     def _similarity(self, image_features, text_features):
         """
+        This is an internal function that calculates the similarity between a single image and a single text.
         :param image_features: Image features to compare to text features
         :param text_features: Text features to compare to image features
         :return: Similarity between text and image
@@ -85,10 +90,12 @@ class Interrogator:
 
     def similarity(self, image_features, text_array, key, device):
         """
+        For each text in text_array, calculate the similarity between the image and the text.
         :param image_features: Image features to compare to text features
-        :param text_features: Text features to compare to image features
+        :param text_array: List of text to compare to image
+        :param key: Key to use for embed_lists
         :param device: Device to run on
-        :return: Similarity between image and text
+        :return: dict of {text: similarity}
         """
         if key not in self.embed_lists:
             self.load(key, text_array, individual=True)
@@ -100,15 +107,21 @@ class Interrogator:
 
     def rank(self, image_features, text_array, key, device, top_count=2):
         """
+        Ranks the text_array by similarity to the image.
+        The top results are the most similar to the image out of the text_array.
+        The bottom results are the least similar to the image out of the text_array.
+        The results are relative to each other, not absolute.
         :param image_features: Image features to compare to text features
-        :param text_array: List of text to compare to image
+        :param text_array: List of text to compare to image.
+            Text will be concatenated to a single tensor and loaded from cache if it is not already loaded.
+        :param key: Key to use for embed_lists.
         :param device: Device to run on
         :param top_count: Number of top results to return
         :return: List of tuples of (text, similarity)
         """
         top_count = min(top_count, len(text_array))
         if key not in self.embed_lists:
-            self.load(key, text_array)
+            self.load(key, text_array, individual=False)
         text_features = self.embed_lists[key].to(device)
 
         similarity = torch.zeros((1, len(text_array))).to(device)
@@ -124,7 +137,7 @@ class Interrogator:
         return top
 
     def __call__(self,
-     input_image,
+     input_image: Image.Image,
      text_array: Union[List[str], Dict[str, List[str]], None] = None,
      similarity=False,
      rank=False,
@@ -133,10 +146,11 @@ class Interrogator:
         :param input_image: PIL image
         :param text_array: List of text to compare to image, or dict of lists of text to compare to image
         :param top_count: Number of top results to return
-        :return: List of lists of tuples of (text, similarity)
-        Input image is embedded and cached
-        text_array is embedded and cached
-        Image and text are compared and ranked
+        :return: 
+            * If similarity is True, returns dict of {text: similarity}
+            * If rank is True, returns list of tuples of (text, similarity)
+            See rank() for more details
+            See similarity() for more details
         If text_array is None, uses default text_array from model["data_lists"]
         """
         if not similarity and not rank:
@@ -147,7 +161,7 @@ class Interrogator:
         if isinstance(text_array, list):
             text_array = {"default": text_array}
         image_embed = ImageEmbed(self.model, self.cache_image)
-        image_hash = image_embed(input_image)
+        image_hash = image_embed(input_image.convert("RGB"))
         self.cache_image.flush()
         image_embed_array = np.load(f"{self.cache_image.cache_dir}/{self.cache_image.kv[image_hash]}.npy")
         image_features = torch.from_numpy(image_embed_array).float().to(self.model["device"])

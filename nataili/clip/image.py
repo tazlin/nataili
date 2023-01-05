@@ -16,10 +16,7 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import hashlib
-import time
-from tqdm import tqdm
 from uuid import uuid4
-import threading
 
 import numpy as np
 import torch
@@ -36,27 +33,15 @@ class ImageEmbed:
         """
         self.model = model
         self.cache = cache
-        self.save_queue = []
-        self.save_lock = threading.Lock()
-        self.save_thread = threading.Thread(target=self.save_worker)
-        self.save_thread.start()
-        
 
-    def save_worker(self):
-        while True:
-            if len(self.save_queue) > 0:
-                with self.save_lock:
-                    batch = self.save_queue.pop(0)
-                    filenames = []
-                    for image_embed_array in batch["image_features"]:
-                        filename = str(uuid4())
-                        np.save(f"{self.cache.cache_dir}/{filename}", image_embed_array.float().cpu().detach().numpy())
-                        filenames.append(filename)
-                    for image_hash, filename in zip(batch["image_hashes"], filenames):
-                        self.cache.kv[image_hash] = filename
-                    del batch
-            else:
-                time.sleep(0.5)
+    def save_batch(self, batch):
+        filenames = []
+        for image_embed_array in batch["image_features"]:
+            filename = str(uuid4())
+            np.save(f"{self.cache.cache_dir}/{filename}", image_embed_array.float().cpu().detach().numpy())
+            filenames.append(filename)
+        for image_hash, filename in zip(batch["image_hashes"], filenames):
+            self.cache.kv[image_hash] = filename
 
     @autocast_cuda
     def __call__(self, pil_image):
@@ -80,7 +65,7 @@ class ImageEmbed:
         np.save(f"{self.cache.cache_dir}/{filename}", image_embed_array)
         self.cache.kv[image_hash] = filename
         return image_hash
-    
+
     @autocast_cuda
     def batch(self, pil_images, batch_size: int = 32):
         """
@@ -92,7 +77,7 @@ class ImageEmbed:
         image_hashes = []
         logger.debug(f"Generating hashes for images")
         for pil_image in pil_images:
-            image_hashes.append(hashlib.sha256(pil_image['pil_image'].tobytes()).hexdigest())
+            image_hashes.append(hashlib.sha256(pil_image["pil_image"].tobytes()).hexdigest())
         cached = True
         logger.debug(f"Checking if images are in cache")
         for image_hash in image_hashes:
@@ -106,18 +91,18 @@ class ImageEmbed:
         batches = []
         if len(pil_images) > batch_size:
             for i in range(0, len(pil_images), batch_size):
-                batches.append(pil_images[i:i+batch_size])
-            batches.append(pil_images[i+batch_size:])
+                batches.append(pil_images[i : i + batch_size])
+            batches.append(pil_images[i + batch_size :])
         else:
             batches.append(pil_images)
         for batch in batches:
             with torch.no_grad():
                 preprocess_images = []
                 for pil_image in batch:
-                    preprocess_images.append(self.model["preprocess"](pil_image['pil_image']).unsqueeze(0).to(self.model["device"]))
+                    preprocess_images.append(
+                        self.model["preprocess"](pil_image["pil_image"]).unsqueeze(0).to(self.model["device"])
+                    )
                 preprocess_images = torch.cat(preprocess_images, dim=0)
                 image_features = self.model["model"].encode_image(preprocess_images)
-                with self.save_lock:
-                    self.save_queue.append({'image_hashes': image_hashes, 'image_features': image_features})
-                del preprocess_images, image_features
+                self.save_batch({"image_hashes": image_hashes, "image_features": image_features})
         return image_hashes
