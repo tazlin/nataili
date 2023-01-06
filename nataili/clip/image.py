@@ -75,11 +75,11 @@ class ImageEmbed:
         Returns SHA256 hash of image
         """
         image_hashes = []
-        logger.debug(f"Generating hashes for images")
+        logger.debug("Generating hashes for images")
         for pil_image in pil_images:
             image_hashes.append(hashlib.sha256(pil_image["pil_image"].tobytes()).hexdigest())
         cached = True
-        logger.debug(f"Checking if images are in cache")
+        logger.debug("Checking if images are in cache")
         for image_hash in image_hashes:
             if image_hash not in self.cache.kv:
                 cached = False
@@ -87,7 +87,7 @@ class ImageEmbed:
         if cached:
             logger.debug(f"Images {image_hashes} already in cache")
             return image_hashes
-        logger.debug(f"Embedding images")
+        logger.debug("Embedding images")
         batches = []
         if len(pil_images) > batch_size:
             for i in range(0, len(pil_images), batch_size):

@@ -36,7 +36,7 @@ black_args = [
     "black",
     "--line-length=119",
 ]
-flake8_args = ["flake8", "--ignore=F401,E501,W503,F821"]
+flake8_args = ["flake8", "--ignore=F401,E501,W503,F821,E731,F841,E722"]
 isort_args = [
     "isort",
 ]

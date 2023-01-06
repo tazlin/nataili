@@ -15,10 +15,11 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+import math
+from typing import Dict, List, Tuple, Union
+
 import numpy as np
 import torch
-from typing import List, Tuple, Union, Dict
-import math
 from PIL import Image
 
 from nataili.cache import Cache
@@ -40,7 +41,7 @@ class Interrogator:
         self.cache = Cache(self.model["cache_name"], cache_parentname="embeds", cache_subname="text")
         self.cache_image = Cache(self.model["cache_name"], cache_parentname="embeds", cache_subname="image")
         self.embed_lists = {}
-    
+
     def load(self, key: str, text_array: List[str], individual: bool = True):
         """
         :param key: Key to use for embed_lists
@@ -66,7 +67,9 @@ class Interrogator:
         if individual:
             self.embed_lists[key] = {}
             for text in text_array:
-                self.embed_lists[key][text] = torch.from_numpy(np.load(f"{self.cache.cache_dir}/{self.cache.kv[text]}.npy")).float()
+                self.embed_lists[key][text] = torch.from_numpy(
+                    np.load(f"{self.cache.cache_dir}/{self.cache.kv[text]}.npy")
+                ).float()
         else:
             with torch.no_grad():
                 text_features = torch.cat(
@@ -130,23 +133,22 @@ class Interrogator:
         similarity /= image_features.shape[0]
 
         top_probs, top_labels = similarity.cpu().topk(top_count, dim=-1)
-        top = [
-            (text_array[top_labels[0][i].numpy()], (top_probs[0][i].numpy() * 100))
-            for i in range(top_count)
-        ]
+        top = [(text_array[top_labels[0][i].numpy()], (top_probs[0][i].numpy() * 100)) for i in range(top_count)]
         return top
 
-    def __call__(self,
-     input_image: Image.Image,
-     text_array: Union[List[str], Dict[str, List[str]], None] = None,
-     similarity=False,
-     rank=False,
-     top_count=2):
+    def __call__(
+        self,
+        input_image: Image.Image,
+        text_array: Union[List[str], Dict[str, List[str]], None] = None,
+        similarity=False,
+        rank=False,
+        top_count=2,
+    ):
         """
         :param input_image: PIL image
         :param text_array: List of text to compare to image, or dict of lists of text to compare to image
         :param top_count: Number of top results to return
-        :return: 
+        :return:
             * If similarity is True, returns dict of {text: similarity}
             * If rank is True, returns list of tuples of (text, similarity)
             See rank() for more details
@@ -168,9 +170,14 @@ class Interrogator:
         if similarity and not rank:
             return self.similarity(image_features, text_array["default"], "default", self.model["device"])
         elif rank and not similarity:
-            return [self.rank(image_features, text_array[k], k, self.model["device"], top_count) for k in text_array.keys()]
+            return [
+                self.rank(image_features, text_array[k], k, self.model["device"], top_count) for k in text_array.keys()
+            ]
         else:
             return {
-                'similarity': self.similarity(image_features, text_array["default"], "default", self.model["device"]),
-                'rank': [self.rank(image_features, text_array[k], k, self.model["device"], top_count) for k in text_array.keys()]
+                "similarity": self.similarity(image_features, text_array["default"], "default", self.model["device"]),
+                "rank": [
+                    self.rank(image_features, text_array[k], k, self.model["device"], top_count)
+                    for k in text_array.keys()
+                ],
             }

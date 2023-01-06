@@ -1499,17 +1499,17 @@
 		"showcases": [
 			"https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/showcase/hentai_diffusion/01_bigdowg.webp"
 		],
-		"version": "17",
+		"version": "19",
 		"style": "anime",
 		"trigger": ["1girl, anime"],
-		"homepage": "https://github.com/Delcos/Hentai-Diffusion",
+		"homepage": "https://github.com/Deltaadams/HentaiDiffusion",
 		"nsfw": true,
 		"download_all": false,
 		"config": {
 			"files": [
 				{
 					"path": "hentai-diffusion.ckpt",
-					"md5sum": "1f6277fd3793a715f242d7c347302e9c"
+					"md5sum": "4b87c5f27919228eadd47013a2764fd9"
 				},
 				{
 					"path": "v1-inference.yaml"
@@ -1519,7 +1519,7 @@
 				{
 					"file_name": "hentai-diffusion.ckpt",
 					"file_path": "",
-					"file_url": "https://huggingface.co/Deltaadams/HentaiDiffusion/resolve/main/HD-17.ckpt"
+					"file_url": "https://huggingface.co/Deltaadams/HentaiDiffusion/resolve/main/HD-19.ckpt"
 				}
 			]
 		},
@@ -1706,7 +1706,7 @@
 		"showcases": [
 			"https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/showcase/rpg/01_gigachad.webp"
 		],
-		"version": "1",
+		"version": "2",
 		"style": "Baldur's Gate",
 		"homepage": "https://huggingface.co/Anashel/rpg",
 		"nsfw": false,
@@ -2276,6 +2276,9 @@
 		"baseline": "stable diffusion 1",
 		"type": "ckpt",
 		"description": "This model was trained on the Valorant agents splash arts, and some extra arts on the official website",
+		"showcases": [
+			"https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/showcase/valorant_diffusion/01_gigachad.webp"
+		],
 		"version": "1.0",
 		"style": "valorant",
 		"trigger": ["valorant style"],
@@ -2511,18 +2514,19 @@
 		"type": "ckpt",
 		"description": "Dreamlike Photoreal 1.0 is a photorealistic Stable Diffusion 1.5 model fine tuned on high quality photos, made by dreamlike.art.",
 		"showcases": [
-			"https://huggingface.co/dreamlike-art/dreamlike-photoreal-1.0/resolve/main/preview.jpg"
+			"https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0/resolve/main/preview1.jpg",
+			"https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0/resolve/main/preview2.jpg"
 		],
-		"version": "1.0",
+		"version": "2.0",
 		"style": "photorealistic",
-		"homepage": "https://huggingface.co/dreamlike-art/dreamlike-photoreal-1.0",
+		"homepage": "https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0",
 		"nsfw": false,
 		"download_all": false,
 		"config": {
 			"files": [
 				{
 					"path": "Dreamlike_Photoreal.ckpt",
-					"md5sum": "97c0379e6763633807e7a2dff6279f9f"
+					"md5sum": "f7bacaa513f5f54805d1fb5bfde7e658"
 				},
 				{
 					"path": "v1-inference.yaml"
@@ -2532,7 +2536,7 @@
 				{
 					"file_name": "Dreamlike_Photoreal.ckpt",
 					"file_path": "",
-					"file_url": "https://huggingface.co/dreamlike-art/dreamlike-photoreal-1.0/resolve/main/dreamlike-photoreal-1.0.ckpt"
+					"file_url": "https://huggingface.co/dreamlike-art/dreamlike-photoreal-2.0/resolve/main/dreamlike-photoreal-2.0.ckpt"
 				}
 			]
 		},
@@ -2635,6 +2639,167 @@
 					"file_name": "Darkest_Diffusion.ckpt",
 					"file_path": "",
 					"file_url": "https://huggingface.co/ai-characters/Darkest-Diffusion/resolve/main/Darkest-Diffusion-v1.0.ckpt"
+				}
+			]
+		},
+		"available": false
+	},
+	"Eternos": {
+		"name": "Eternos",
+		"baseline": "stable diffusion 1",
+		"type": "ckpt",
+		"description": "A surrealist / Minimalist model",
+		"version": "1.0",
+		"style": "surrealist",
+		"trigger": ["romerorzeternos"],
+		"homepage": "https://huggingface.co/RomeroRZ/style-eternos",
+		"nsfw": false,
+		"download_all": false,
+		"config": {
+			"files": [
+				{
+					"path": "Eternos.ckpt",
+					"md5sum": "d82d743c5531f42aacc80af491bb5124"
+				},
+				{
+					"path": "v1-inference.yaml"
+				}
+			],
+			"download": [
+				{
+					"file_name": "Eternos.ckpt",
+					"file_path": "",
+					"file_url": "https://huggingface.co/RomeroRZ/style-eternos/resolve/main/romerorz-eternos-512.ckpt"
+				}
+			]
+		},
+		"available": false
+	},
+	"Min Illust Background": {
+		"name": "Min Illust Background",
+		"baseline": "stable diffusion 1",
+		"type": "ckpt",
+		"description": "This fine-tuned Stable Diffusion v1.5 model was trained on a selection of artistic works by Sin Jong Hun",
+		"version": "1.0",
+		"style": "landscape",
+		"trigger": ["sjh style"],
+		"homepage": "https://huggingface.co/ProGamerGov/Min-Illust-Background-Diffusion",
+		"nsfw": false,
+		"download_all": false,
+		"config": {
+			"files": [
+				{
+					"path": "MinIllustBackground_Diffusion.ckpt",
+					"md5sum": "cf5fb557635a5a707003fcfeb4934af6"
+				},
+				{
+					"path": "v1-inference.yaml"
+				}
+			],
+			"download": [
+				{
+					"file_name": "MinIllustBackground_Diffusion.ckpt",
+					"file_path": "",
+					"file_url": "https://huggingface.co/ProGamerGov/Min-Illust-Background-Diffusion/resolve/main/sjh_style_v1_iter2250.ckpt"
+				}
+			]
+		},
+		"available": false
+	},
+	"Dark Victorian Diffusion": {
+		"name": "Dark Victorian Diffusion",
+		"baseline": "stable diffusion 1",
+		"type": "ckpt",
+		"description": "finetuned on dark, moody, victorian imagery",
+		"version": "2.0",
+		"style": "victorian",
+		"trigger": ["darkvictorian artstyle"],
+		"homepage": "https://huggingface.co/proxima/darkvictorian_artstyle",
+		"nsfw": false,
+		"download_all": false,
+		"config": {
+			"files": [
+				{
+					"path": "DarkVictorian_Diffusion.ckpt",
+					"md5sum": "29f6c1d379360859c6e3fcf4be2e5381"
+				},
+				{
+					"path": "v1-inference.yaml"
+				}
+			],
+			"download": [
+				{
+					"file_name": "DarkVictorian_Diffusion.ckpt",
+					"file_path": "",
+					"file_url": "https://huggingface.co/proxima/darkvictorian_artstyle/resolve/main/darkvictorian_artstyle_v2.ckpt"
+				}
+			]
+		},
+		"available": false
+	},
+	"DnD Item": {
+		"name": "DnD Item",
+		"baseline": "stable diffusion 1",
+		"type": "ckpt",
+		"description": "This is a model (dnditem) for creating magic items, for the game Dungeons and Dragons! It was trained to be very similar to the official results that are available here: https://www.dndbeyond.com/magic-items",
+		"showcases": [
+			"https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/showcase/dnd_item/01_voodoocode.webp"
+		],
+		"version": "1.0",
+		"style": "DnD",
+		"trigger": ["dnditem"],
+		"homepage": "https://huggingface.co/stale2000/sd-dnditem",
+		"nsfw": false,
+		"download_all": false,
+		"config": {
+			"files": [
+				{
+					"path": "DnDItem.ckpt",
+					"md5sum": "ecb05cd91feb21c4b7f12022e4a8da7c"
+				},
+				{
+					"path": "v1-inference.yaml"
+				}
+			],
+			"download": [
+				{
+					"file_name": "DnDItem.ckpt",
+					"file_path": "",
+					"file_url": "https://huggingface.co/stale2000/sd-dnditem/resolve/main/dnditem-v1.ckpt"
+				}
+			]
+		},
+		"available": false
+	},
+	"ModernArt Diffusion": {
+		"name": "ModernArt Diffusion",
+		"baseline": "stable diffusion 1",
+		"type": "ckpt",
+		"description": "You can use this model to generate modernart style images",
+		"showcases": [
+			"https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/showcase/modernart_diffusion/01_voodoocode.webp"
+		],
+		"version": "1.0",
+		"style": "modern art",
+		"trigger": ["modernartst"],
+		"homepage": "https://huggingface.co/theintuitiveye/modernartstyle",
+		"nsfw": false,
+		"download_all": false,
+		"config": {
+			"files": [
+				{
+					"path": "ModernArt_Diffusion.ckpt",
+					"md5sum": "8fa2323f4fac81899c188ab25830e454"
+				},
+				{
+					"path": "v1-inference.yaml"
+				}
+			],
+			"download": [
+				{
+					"file_name": "ModernArt_Diffusion.ckpt",
+					"file_path": "",
+					"file_url": "https://huggingface.co/theintuitiveye/modernartstyle/resolve/main/modernartstv1.ckpt"
 				}
 			]
 		},
