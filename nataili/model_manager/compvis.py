@@ -20,6 +20,7 @@ from pathlib import Path
 
 import torch
 from omegaconf import OmegaConf
+from torch import nn
 
 from ldm.util import instantiate_from_config
 
@@ -81,6 +82,9 @@ class CompVisModelManager(BaseModelManager):
         model = instantiate_from_config(config.model)
         m, u = model.load_state_dict(sd, strict=False)
         model = model.eval()
+        for m in model.modules():
+            if isinstance(m, (nn.Conv2d, nn.ConvTranspose2d)):
+                m._orig_padding_mode = m.padding_mode
         del pl_sd, sd, m, u
         return model
 
