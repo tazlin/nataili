@@ -51,7 +51,9 @@ class BaseModelManager:
         self.models_path = self.pkg / f"{self.models_db_name}.json"
         self.cuda_available = torch.cuda.is_available()
         self.cuda_devices, self.recommended_gpu = self.get_cuda_devices()
-        self.remote_db = f"https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/{self.models_db_name}.json"
+        self.remote_db = (
+            f"https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/{self.models_db_name}.json"
+        )
         self.download_reference = download_reference
 
     def init(self):
@@ -64,7 +66,7 @@ class BaseModelManager:
             if self.check_model_available(model):
                 models_available.append(model)
         self.available_models = models_available
-    
+
     def download_model_reference(self):
         try:
             logger.init("Model Reference", status="Downloading")

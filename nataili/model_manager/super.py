@@ -15,6 +15,8 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+from nataili.util import logger
+
 from .aitemplate import AITemplateModelManager
 from .blip import BlipModelManager
 from .clip import ClipModelManager
@@ -23,7 +25,6 @@ from .compvis import CompVisModelManager
 from .esrgan import EsrganModelManager
 from .gfpgan import GfpganModelManager
 
-from nataili.util import logger
 
 class ModelManager:
     def __init__(
@@ -35,7 +36,7 @@ class ModelManager:
         esrgan: EsrganModelManager = EsrganModelManager(),
         gfpgan: GfpganModelManager = GfpganModelManager(),
         codeformer: bool = False,
-        ):
+    ):
         self.aitemplate = aitemplate
         self.blip = blip
         self.clip = clip
@@ -44,7 +45,7 @@ class ModelManager:
         self.gfpgan = gfpgan
         if codeformer and self.esrgan is not None and self.gfpgan is not None:
             self.codeformer = CodeFormerModelManager(gfpgan=self.gfpgan, esrgan=self.esrgan)
-        
+
     def load(
         self,
         model_name,
@@ -63,17 +64,26 @@ class ModelManager:
         if model_name in self.aitemplate.models:
             return self.aitemplate.load(model_name, gpu_id)
         if model_name in self.blip.models:
-            return self.blip.load(model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only)
+            return self.blip.load(
+                model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only
+            )
         if model_name in self.clip.models:
-            return self.clip.load(model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only)
+            return self.clip.load(
+                model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only
+            )
         if model_name in self.compvis.models:
-            return self.compvis.load(model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only, voodoo=voodoo)
+            return self.compvis.load(
+                model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only, voodoo=voodoo
+            )
         if model_name in self.esrgan.models:
-            return self.esrgan.load(model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only)
+            return self.esrgan.load(
+                model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only
+            )
         if model_name in self.gfpgan.models:
             return self.gfpgan.load(model_name=model_name, gpu_id=gpu_id, cpu_only=cpu_only)
         if model_name in self.codeformer.models:
-            return self.codeformer.load(model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only)
+            return self.codeformer.load(
+                model_name=model_name, half_precision=half_precision, gpu_id=gpu_id, cpu_only=cpu_only
+            )
         logger.error(f"{model_name} not found")
         return
-

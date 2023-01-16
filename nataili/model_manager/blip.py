@@ -37,7 +37,6 @@ class BlipModelManager(BaseModelManager):
         self.models_db_name = "blip"
         super().__init__()
         self.init()
-        
 
     def load(
         self,
