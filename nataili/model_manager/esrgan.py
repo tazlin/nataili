@@ -27,15 +27,16 @@ from .base import BaseModelManager
 
 
 class EsrganModelManager(BaseModelManager):
-    def __init__(self):
+    def __init__(self, download_reference=True):
         super().__init__()
         self.path = f"{Path.home()}/.cache/nataili/esrgan"
-        self.models_path = self.pkg / "esrgan.json"
+        self.models_db_name = "esrgan"
+        super().__init__()
         self.init()
 
     def load(
         self,
-        model_name,
+        model_name: str,
         half_precision=True,
         gpu_id=0,
         cpu_only=False,

@@ -25,10 +25,10 @@ from .base import BaseModelManager
 
 
 class NewModelManager(BaseModelManager):
-    def __init__(self):
+    def __init__(self, download_reference=True):
         super().__init__()
         self.path = f"{Path.home()}/.cache/nataili/new"
-        self.models_path = self.pkg / "new.json"
+        self.models_db_name = "new"
         self.init()
 
     def load(

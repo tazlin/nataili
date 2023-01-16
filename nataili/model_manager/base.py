@@ -41,23 +41,40 @@ logging.set_verbosity_error()
 
 
 class BaseModelManager:
-    def __init__(self):
+    def __init__(self, download_reference=True):
         self.path = f"{Path.home()}/.cache/nataili/"
         self.models = {}
         self.available_models = []
         self.loaded_models = {}
         self.pkg = importlib_resources.files("nataili")
-        self.models_path = self.pkg / "models.json"
+        self.models_db_name = "models"
+        self.models_path = self.pkg / f"{self.models_db_name}.json"
         self.cuda_available = torch.cuda.is_available()
         self.cuda_devices, self.recommended_gpu = self.get_cuda_devices()
+        self.remote_db = f"https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/{self.models_db_name}.json"
+        self.download_reference = download_reference
 
     def init(self):
-        self.models = json.loads((self.models_path).read_text())
+        if self.download_reference:
+            self.models = self.download_model_reference()
+        else:
+            self.models = json.loads((self.models_path).read_text())
         models_available = []
         for model in self.models:
             if self.check_model_available(model):
                 models_available.append(model)
         self.available_models = models_available
+    
+    def download_model_reference(self):
+        try:
+            logger.init("Model Reference", status="Downloading")
+            response = requests.get(self.remote_db)
+            logger.init_ok("Model Reference", status="OK")
+            return response.json()
+        except Exception as e:
+            logger.init_err("Model Reference", status=f"Download failed: {e}")
+            logger.init_warn("Model Reference", status="Local")
+            return json.loads((self.models_path).read_text())
 
     def get_model(self, model_name):
         return self.models.get(model_name)
@@ -360,7 +377,7 @@ class BaseModelManager:
             recommended_gpu = [x for x in cuda_arch if x["sm"] == cuda_arch[0]["sm"]]
             return cuda_arch, recommended_gpu
         else:
-            return None
+            return None, None
 
     def get_filtered_models(self, **kwargs):
         """

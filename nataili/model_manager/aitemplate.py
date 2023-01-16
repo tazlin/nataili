@@ -37,20 +37,21 @@ class AITemplateModelManager(BaseModelManager):
         self.init()
 
     def init(self):
-        logger.info(f"Highest CUDA Compute Capability: {self.cuda_devices[0]['sm']}")
-        logger.debug(f"Available CUDA Devices: {self.cuda_devices}")
-        logger.info(f"Recommended GPU: {self.recommended_gpu}")
-        sm = self.recommended_gpu[0]["sm"]
-        logger.info(f"Using sm_{sm} for AITemplate")
-        for aitemplate in self.models:
-            ait_files = self.get_aitemplate_files(sm)
-            if len(ait_files) > 0 and self.check_available(ait_files):
-                self.available_models.append(aitemplate)
-                logger.info(f"Available AITemplate: {aitemplate}")
-        if len(self.available_models) == 0:
-            logger.warning("No AITemplate available")
-        else:
-            self.ait_workdir = self.get_ait_workdir(sm)
+        if self.cuda_available:
+            logger.info(f"Highest CUDA Compute Capability: {self.cuda_devices[0]['sm']}")
+            logger.debug(f"Available CUDA Devices: {self.cuda_devices}")
+            logger.info(f"Recommended GPU: {self.recommended_gpu}")
+            sm = self.recommended_gpu[0]["sm"]
+            logger.info(f"Using sm_{sm} for AITemplate")
+            for aitemplate in self.models:
+                ait_files = self.get_aitemplate_files(sm)
+                if len(ait_files) > 0 and self.check_available(ait_files):
+                    self.available_models.append(aitemplate)
+                    logger.info(f"Available AITemplate: {aitemplate}")
+            if len(self.available_models) == 0:
+                logger.warning("No AITemplate available")
+            else:
+                self.ait_workdir = self.get_ait_workdir(sm)
 
     def download_ait(self, cuda_arch):
         """
@@ -116,7 +117,7 @@ class AITemplateModelManager(BaseModelManager):
 
     def load(
         self,
-        model_name,
+        model_name: str = "stable_diffusion",
         gpu_id=0,
     ):
         """

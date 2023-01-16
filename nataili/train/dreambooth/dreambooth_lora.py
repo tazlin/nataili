@@ -37,7 +37,7 @@ class DreamboothLoRA:
         data_root: str,
         project_name: str,
         output_dir: str,
-        max_train_steps: int,
+        max_train_steps: int = None,
         base_vae_checkpoint: Optional[str] = None,
         conditional_dropout: Optional[float] = 0.04,
         flip_p: Optional[float] = 0.0,

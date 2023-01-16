@@ -28,9 +28,9 @@ from .base import BaseModelManager
 
 class ClipModelManager(BaseModelManager):
     def __init__(self):
-        super().__init__()
         self.path = f"{Path.home()}/.cache/nataili/clip"
-        self.models_path = self.pkg / "clip.json"
+        self.models_db_name = "clip"
+        super().__init__()
         self.init()
 
     def load_data_lists(self):
@@ -88,7 +88,7 @@ class ClipModelManager(BaseModelManager):
             "cache_name": model_name.replace("/", "_"),
         }
 
-    def load(self, model_name, half_precision=True, gpu_id=0, cpu_only=False):
+    def load(self, model_name: str, half_precision=True, gpu_id=0, cpu_only=False):
         """
         model_name: str. Name of the model to load. See available_models for a list of available models.
         half_precision: bool. If True, the model will be loaded in half precision.

@@ -25,17 +25,17 @@ from .base import BaseModelManager
 
 
 class CodeFormerModelManager(BaseModelManager):
-    def __init__(self, gfpgan, esrgan):
-        super().__init__()
+    def __init__(self, gfpgan, esrgan, download_reference=True):
         self.path = f"{Path.home()}/.cache/nataili/codeformer"
-        self.models_path = self.pkg / "codeformer.json"
+        self.models_db_name = "codeformer"
         self.gfpgan = gfpgan
         self.esrgan = esrgan
+        super().__init__()
         self.init()
 
     def load(
         self,
-        model_name,
+        model_name: str,
         half_precision=True,
         gpu_id=0,
         cpu_only=False,

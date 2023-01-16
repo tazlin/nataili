@@ -32,15 +32,16 @@ from .base import BaseModelManager
 
 
 class BlipModelManager(BaseModelManager):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, download_reference=True):
         self.path = f"{Path.home()}/.cache/nataili/blip"
-        self.models_path = self.pkg / "blip.json"
+        self.models_db_name = "blip"
+        super().__init__()
         self.init()
+        
 
     def load(
         self,
-        model_name,
+        model_name: str,
         half_precision=True,
         gpu_id=0,
         cpu_only=False,

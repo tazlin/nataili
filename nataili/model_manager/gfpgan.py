@@ -25,21 +25,21 @@ from .base import BaseModelManager
 
 
 class GfpganModelManager(BaseModelManager):
-    def __init__(self):
+    def __init__(self, download_reference=True):
         super().__init__()
         self.path = f"{Path.home()}/.cache/nataili/gfpgan"
-        self.models_path = self.pkg / "gfpgan.json"
+        self.models_db_name = "gfpgan"
+        super().__init__()
         self.init()
 
     def load(
         self,
-        model_name,
+        model_name: str,
         gpu_id=0,
         cpu_only=False,
     ):
         """
         model_name: str. Name of the model to load. See available_models for a list of available models.
-        half_precision: bool. If True, the model will be loaded in half precision.
         gpu_id: int. The id of the gpu to use. If the gpu is not available, the model will be loaded on the cpu.
         cpu_only: bool. If True, the model will be loaded on the cpu. If True, half_precision will be set to False.
         """
