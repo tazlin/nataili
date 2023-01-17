@@ -26,11 +26,12 @@ from .base import BaseModelManager
 
 class CodeFormerModelManager(BaseModelManager):
     def __init__(self, gfpgan, esrgan, download_reference=True):
+        super().__init__()
         self.path = f"{Path.home()}/.cache/nataili/codeformer"
         self.models_db_name = "codeformer"
         self.gfpgan = gfpgan
         self.esrgan = esrgan
-        super().__init__()
+        self.models_path = self.pkg / f"{self.models_db_name}.json"
         self.init()
 
     def load(

@@ -33,7 +33,7 @@ class CompVisModelManager(BaseModelManager):
         super().__init__()
         self.path = f"{Path.home()}/.cache/nataili/compvis"
         self.models_db_name = "stable_diffusion"
-        super().__init__()
+        self.models_path = self.pkg / f"{self.models_db_name}.json"
         self.init()
 
     def load(

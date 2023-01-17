@@ -31,7 +31,7 @@ class EsrganModelManager(BaseModelManager):
         super().__init__()
         self.path = f"{Path.home()}/.cache/nataili/esrgan"
         self.models_db_name = "esrgan"
-        super().__init__()
+        self.models_path = self.pkg / f"{self.models_db_name}.json"
         self.init()
 
     def load(
@@ -91,6 +91,14 @@ class EsrganModelManager(BaseModelManager):
                 num_block=6,
                 num_grow_ch=32,
                 scale=4,
+            ),
+            "RealESRGAN_x2plus": RRDBNet(
+                num_in_ch=3,
+                num_out_ch=3,
+                num_feat=64,
+                num_block=23,
+                num_grow_ch=32,
+                scale=2,
             ),
         }
         model_path = self.get_model_files(model_name)[0]["path"]

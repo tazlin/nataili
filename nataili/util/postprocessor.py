@@ -21,7 +21,7 @@ import uuid
 import numpy as np
 import PIL.Image
 
-from nataili.util import save_sample
+from nataili.util.save_sample import save_sample
 
 
 class PostProcessor:
@@ -69,4 +69,4 @@ class PostProcessor:
         filename = f"{filename}_{self.filename_append}"
         # filename_with_ext = f"{filename}.{self.output_ext}"
         # output_image = os.path.join(self.output_dir, filename_with_ext)
-        save_sample(output_image, filename, self.output_dir, self.output_ext)
+        save_sample(image=output_image, filename=filename, sample_path=self.output_dir, extension=self.output_ext)

@@ -29,7 +29,7 @@ class GfpganModelManager(BaseModelManager):
         super().__init__()
         self.path = f"{Path.home()}/.cache/nataili/gfpgan"
         self.models_db_name = "gfpgan"
-        super().__init__()
+        self.models_path = self.pkg / f"{self.models_db_name}.json"
         self.init()
 
     def load(
