@@ -12,6 +12,7 @@ from .img2img import find_noise_for_image, get_matched_noise, process_init_mask,
 from .load_learned_embed_in_clip import load_learned_embed_in_clip
 from .load_list import load_list
 from .logger import logger, set_logger_verbosity
+from .normalized import normalized
 from .postprocessor import PostProcessor
 from .process_prompt_tokens import process_prompt_tokens
 from .save_sample import save_sample
