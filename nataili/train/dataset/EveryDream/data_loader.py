@@ -89,7 +89,7 @@ class DataLoaderMultiAspect:
         try:
             with open(file_path, encoding="utf-8", mode="r") as caption_file:
                 caption = caption_file.read()
-        except:
+        except Exception:
             logging.error(f" *** Error reading {file_path} to get caption, falling back to filename")
             caption = fallback_caption
             pass
@@ -181,7 +181,7 @@ class DataLoaderMultiAspect:
                 with open(multiply_path, encoding="utf-8", mode="r") as f:
                     multiply = int(float(f.read().strip()))
                     logging.info(f" * DLMA multiply.txt in {recurse_root} set to {multiply}")
-            except:
+            except Exception:
                 logging.error(f" *** Error reading multiply.txt in {recurse_root}, defaulting to 1")
                 pass
 

@@ -55,23 +55,23 @@ class PredictorPrepare:
             raise NotImplementedError
         try:
             self.x = np.vstack(self.x)
-        except:
+        except Exception:
             raise Exception("Could not stack x")
         try:
             self.y = np.vstack(self.y)
-        except:
+        except Exception:
             raise Exception("Could not stack y")
         logger.info(f"Shape of x: {self.x.shape}")
         logger.info(f"Shape of y: {self.y.shape}")
         logger.info(f"Saving x to {output_directory}/x.npy")
         try:
             np.save(f"{output_directory}/x.npy", self.x)
-        except:
+        except Exception:
             raise Exception(f"Could not save x to {output_directory}/x.npy")
         logger.info(f"Saving y to {output_directory}/y.npy")
         try:
             np.save(f"{output_directory}/y.npy", self.y)
-        except:
+        except Exception:
             raise Exception(f"Could not save y to {output_directory}/y.npy")
 
     def _prepare_from_filename(self, input_directory: str, rating_type: Literal["float", "string"] = "float"):
@@ -114,7 +114,7 @@ class PredictorPrepare:
             try:
                 rating = float(rating)
                 logger.debug(f"Converted rating {rating} to float")
-            except:
+            except Exception:
                 raise Exception(f"Could not parse rating {rating} as float")
         logger.info(f"Processing file: {file_path} with rating {rating}")
         self.x.append(normalized(self._image_features(file_path)))
@@ -130,7 +130,7 @@ class PredictorPrepare:
             if os.path.exists(image):
                 try:
                     image = Image.open(image)
-                except:
+                except Exception:
                     raise Exception(f"Could not open image {image}")
             else:
                 raise Exception(f"Could not find image {image}")

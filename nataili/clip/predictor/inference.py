@@ -59,7 +59,7 @@ class PredictorInference:
             if os.path.exists(image):
                 try:
                     image = Image.open(image)
-                except:
+                except Exception:
                     raise Exception(f"Could not open image {image}")
             else:
                 raise Exception(f"Could not find image {image}")

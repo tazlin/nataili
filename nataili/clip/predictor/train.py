@@ -55,11 +55,11 @@ class TrainPredictor:
     def __call__(self):
         try:
             x = np.load(self.x)
-        except:
+        except Exception:
             raise Exception(f"Could not load {self.x}")
         try:
             y = np.load(self.y)
-        except:
+        except Exception:
             raise Exception(f"Could not load {self.y}")
         train_border = int(len(x) * (1 - self.validation_percentage))
         try:
@@ -71,7 +71,7 @@ class TrainPredictor:
             validation_tensor_y = torch.Tensor(y[train_border:])
             validation_dataset = TensorDataset(validation_tensor_x, validation_tensor_y)
             validation_loader = DataLoader(validation_dataset, batch_size=self.batch_size)
-        except:
+        except Exception:
             raise Exception("Could not create train and validation data")
         criterion = nn.MSELoss()
         criterion2 = nn.L1Loss()
@@ -115,11 +115,11 @@ class TrainPredictor:
             self.best_loss = sum(losses) / len(losses)
             try:
                 torch.save(self.model.state_dict(), self.save_name)
-            except:
+            except Exception:
                 raise RuntimeError("Could not save model.")
         try:
             torch.save(self.model.state_dict(), self.save_name)
-        except:
+        except Exception:
             raise RuntimeError("Could not save model.")
         logger.info(f"Model saved to {self.save_name}")
         logger.info(f"Best MAE loss {self.best_loss}")
