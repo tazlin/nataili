@@ -4,6 +4,7 @@ Nataili is a Python library that provides a set of tools to build multimodal AI 
 
 * BLIP: Image captioning
 * CLIP: Image interrogation
+* CLIP+MLP Predictor
 * ESRGAN: Image super-resolution
 * GFPGAN: Post-processing for faces
 * CodeFormer: Post-processing and super-resolution for faces
