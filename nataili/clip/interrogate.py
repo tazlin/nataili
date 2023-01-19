@@ -82,6 +82,38 @@ class Interrogator:
             text_features /= text_features.norm(dim=-1, keepdim=True)
             self.embed_lists[key] = text_features
 
+    def _text_similarity(self, text_features, text_features_2):
+        """
+        This is an internal function that calculates the similarity between two texts.
+        :param text_features: Text features to compare
+        :param text_features_2: Text features to compare to
+        :return: Similarity between text and text
+        """
+        return text_features @ text_features_2.T
+
+    def text_similarity(self, text_array, text_array_2, key, key_2, device):
+        """
+        For each text in text_array, calculate the similarity between the text and each text in text_array_2.
+        :param text_array: List of text to compare
+        :param text_array_2: List of text to compare to
+        :param key: Key to use for embed_lists
+        :param key_2: Key to use for embed_lists
+        :param device: Device to run on
+        :return: dict of {text: {text: similarity}}
+        """
+        if key not in self.embed_lists:
+            self.load(key, text_array, individual=True)
+        if key_2 not in self.embed_lists:
+            self.load(key_2, text_array_2, individual=True)
+        similarity = {}
+        for text in text_array:
+            text_features = self.embed_lists[key][text].to(device)
+            similarity[text] = {}
+            for text_2 in text_array_2:
+                text_features_2 = self.embed_lists[key_2][text_2].to(device)
+                similarity[text][text_2] = round(self._text_similarity(text_features, text_features_2)[0][0].item(), 4)
+        return similarity
+
     def _similarity(self, image_features, text_features):
         """
         This is an internal function that calculates the similarity between a single image and a single text.
@@ -106,7 +138,7 @@ class Interrogator:
         for text in text_array:
             text_features = self.embed_lists[key][text].to(device)
             similarity[text] = round(self._similarity(image_features, text_features)[0][0].item(), 4)
-        return similarity
+        return {k: v for k, v in sorted(similarity.items(), key=lambda item: item[1], reverse=True)}
 
     def rank(self, image_features, text_array, key, device, top_count=2):
         """
@@ -162,20 +194,28 @@ class Interrogator:
             text_array = self.model["data_lists"]
         if isinstance(text_array, list):
             text_array = {"default": text_array}
+        elif isinstance(text_array, dict):
+            pass
         image_embed = ImageEmbed(self.model, self.cache_image)
         image_hash = image_embed(input_image.convert("RGB"))
         self.cache_image.flush()
         image_embed_array = np.load(f"{self.cache_image.cache_dir}/{self.cache_image.kv[image_hash]}.npy")
         image_features = torch.from_numpy(image_embed_array).float().to(self.model["device"])
         if similarity and not rank:
-            return self.similarity(image_features, text_array["default"], "default", self.model["device"])
+            results = {}
+            for k in text_array.keys():
+                results[k] = self.similarity(image_features, text_array[k], k, self.model["device"])
+            return results
         elif rank and not similarity:
             return [
                 self.rank(image_features, text_array[k], k, self.model["device"], top_count) for k in text_array.keys()
             ]
         else:
+            similarity = {}
+            for k in text_array.keys():
+                similarity[k] = self.similarity(image_features, text_array[k], k, self.model["device"])
             return {
-                "similarity": self.similarity(image_features, text_array["default"], "default", self.model["device"]),
+                "similarity": similarity,
                 "rank": [
                     self.rank(image_features, text_array[k], k, self.model["device"], top_count)
                     for k in text_array.keys()
