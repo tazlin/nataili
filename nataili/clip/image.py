@@ -54,7 +54,7 @@ class ImageEmbed:
         image_hash = hashlib.sha256(pil_image.tobytes()).hexdigest()
         if image_hash in self.cache.kv:
             logger.debug(f"Image {image_hash} already in cache")
-            return image_hash
+            return image_hash, False
         logger.debug(f"Embedding image {image_hash}")
         with torch.no_grad():
             preprocess_image = self.model["preprocess"](pil_image).unsqueeze(0).to(self.model["device"])
@@ -64,7 +64,7 @@ class ImageEmbed:
         filename = str(uuid4())
         np.save(f"{self.cache.cache_dir}/{filename}", image_embed_array)
         self.cache.kv[image_hash] = filename
-        return image_hash
+        return image_hash, True
 
     @autocast_cuda
     def batch(self, pil_images, batch_size: int = 32):

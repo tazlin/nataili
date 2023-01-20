@@ -56,23 +56,30 @@ class PredictorPrepare:
         try:
             self.x = np.vstack(self.x)
         except Exception:
-            raise Exception("Could not stack x")
+            logger.error("Could not stack x")
+            exit(1)
         try:
             self.y = np.vstack(self.y)
         except Exception:
-            raise Exception("Could not stack y")
+            logger.error("Could not stack y")
+            exit(1)
         logger.info(f"Shape of x: {self.x.shape}")
         logger.info(f"Shape of y: {self.y.shape}")
+        if not os.path.exists(output_directory):
+            logger.info(f"Creating output directory: {output_directory}")
+            os.makedirs(output_directory)
         logger.info(f"Saving x to {output_directory}/x.npy")
         try:
             np.save(f"{output_directory}/x.npy", self.x)
         except Exception:
-            raise Exception(f"Could not save x to {output_directory}/x.npy")
+            logger.error(f"Could not save x to {output_directory}/x.npy")
+            exit(1)
         logger.info(f"Saving y to {output_directory}/y.npy")
         try:
             np.save(f"{output_directory}/y.npy", self.y)
         except Exception:
-            raise Exception(f"Could not save y to {output_directory}/y.npy")
+            logger.error(f"Could not save y to {output_directory}/y.npy")
+            exit(1)
 
     def _prepare_from_filename(self, input_directory: str, rating_type: Literal["float", "string"] = "float"):
         """
@@ -115,9 +122,13 @@ class PredictorPrepare:
                 rating = float(rating)
                 logger.debug(f"Converted rating {rating} to float")
             except Exception:
-                raise Exception(f"Could not parse rating {rating} as float")
+                logger.error(f"Could not parse rating {rating} as float")
+                return
         logger.info(f"Processing file: {file_path} with rating {rating}")
-        self.x.append(normalized(self._image_features(file_path)))
+        image_features = self._image_features(file_path)
+        if image_features is None:
+            return
+        self.x.append(normalized(image_features))
         self.y.append(self._y(rating))
 
     def _image_features(self, image: Union[str, Image.Image]):
@@ -131,12 +142,15 @@ class PredictorPrepare:
                 try:
                     image = Image.open(image)
                 except Exception:
-                    raise Exception(f"Could not open image {image}")
+                    logger.error(f"Could not open image {image}")
+                    return None
             else:
-                raise Exception(f"Could not find image {image}")
+                logger.error(f"Could not find image {image}")
+                return None
         image = image.convert("RGB")
-        image_hash = self.image_embed(image)
-        self.cache_image.flush()
+        image_hash, flush = self.image_embed(image)
+        if flush:
+            self.cache_image.flush()
         image_embed_array = np.load(f"{self.cache_image.cache_dir}/{self.cache_image.kv[image_hash]}.npy")
         return image_embed_array
 

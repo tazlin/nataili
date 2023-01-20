@@ -60,9 +60,11 @@ class PredictorInference:
                 try:
                     image = Image.open(image)
                 except Exception:
-                    raise Exception(f"Could not open image {image}")
+                    logger.error(f"Could not open image {image}")
+                    return None
             else:
-                raise Exception(f"Could not find image {image}")
+                logger.error(f"Could not find image {image}")
+                return None
         image = image.convert("RGB")
         image_hash = self.image_embed(image)
         self.cache_image.flush()
@@ -80,12 +82,17 @@ class PredictorInference:
             elif isinstance(images[0], Image.Image):
                 pass
             else:
-                raise Exception(f"Invalid type {type(images[0])} in images list")
+                logger.error(f"Invalid type {type(images[0])} in images list")
+                exit(1)
         else:
-            raise Exception(f"Invalid type {type(images)} for images")
+            logger.error(f"Invalid type {type(images)} for images")
+            exit(1)
         predictions = []
         for idx, image in enumerate(images):
             image_embed_array = self._image_features(image)
+            if image_embed_array is None:
+                logger.error(f"Could not get image features for {image}")
+                continue
             image_embed_array = normalized(image_embed_array)
             image_embed = torch.from_numpy(image_embed_array).to(self.device)
             with torch.no_grad():

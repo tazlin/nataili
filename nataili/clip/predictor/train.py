@@ -56,11 +56,13 @@ class TrainPredictor:
         try:
             x = np.load(self.x)
         except Exception:
-            raise Exception(f"Could not load {self.x}")
+            logger.error(f"Could not load {self.x}")
+            exit(1)
         try:
             y = np.load(self.y)
         except Exception:
-            raise Exception(f"Could not load {self.y}")
+            logger.error(f"Could not load {self.y}")
+            exit(1)
         train_border = int(len(x) * (1 - self.validation_percentage))
         try:
             train_tensor_x = torch.Tensor(x[:train_border])
@@ -72,7 +74,8 @@ class TrainPredictor:
             validation_dataset = TensorDataset(validation_tensor_x, validation_tensor_y)
             validation_loader = DataLoader(validation_dataset, batch_size=self.batch_size)
         except Exception:
-            raise Exception("Could not create train and validation data")
+            logger.error("Could not create train and validation data")
+            exit(1)
         criterion = nn.MSELoss()
         criterion2 = nn.L1Loss()
         self.model.train()

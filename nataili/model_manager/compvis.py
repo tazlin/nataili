@@ -34,6 +34,9 @@ class CompVisModelManager(BaseModelManager):
         self.path = f"{Path.home()}/.cache/nataili/compvis"
         self.models_db_name = "stable_diffusion"
         self.models_path = self.pkg / f"{self.models_db_name}.json"
+        self.remote_db = (
+            f"https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/{self.models_db_name}.json"
+        )
         self.init()
 
     def load(
