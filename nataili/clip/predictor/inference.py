@@ -7,7 +7,7 @@ from PIL import Image
 
 from nataili.cache import Cache
 from nataili.clip import ImageEmbed, TextEmbed
-from nataili.clip.predictor import MLP
+from nataili.clip.predictor.mlp import MLP
 from nataili.model_manager import ClipModelManager
 from nataili.util import logger, normalized
 
@@ -66,8 +66,9 @@ class PredictorInference:
                 logger.error(f"Could not find image {image}")
                 return None
         image = image.convert("RGB")
-        image_hash = self.image_embed(image)
-        self.cache_image.flush()
+        image_hash, flush = self.image_embed(image)
+        if flush:
+            self.cache_image.flush()
         image_embed_array = np.load(f"{self.cache_image.cache_dir}/{self.cache_image.kv[image_hash]}.npy")
         return image_embed_array
 

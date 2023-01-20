@@ -94,32 +94,32 @@ class TrainPredictor:
                 self.model.optimizer.step()
                 if batch_number % 1000 == 0:
                     logger.info("\tEpoch %d | Batch %d | Loss %6.2f" % (epoch, batch_number, loss.item()))
-        logger.info("Epoch %d | Loss %6.2f" % (epoch, sum(losses) / len(losses)))
-        losses = []
-        losses2 = []
-        for batch_number, input_data in enumerate(validation_loader):
-            x, y = input_data
-            x = x.to(self.device).float()
-            y = y.to(self.device)
-            output = self.model(x)
-            loss = criterion(output, y)
-            lossMAE = criterion2(output, y)
-            losses.append(loss.item())
-            losses2.append(lossMAE.item())
-            if batch_number % 1000 == 0:
-                logger.info("\tEpoch %d | Batch %d | Loss %6.2f" % (epoch, batch_number, loss.item()))
-                logger.info(
-                    "\tValidation - Epoch %d | Batch %d | MAE Loss %6.2f" % (epoch, batch_number, lossMAE.item())
-                )
-        logger.info("Validation - Epoch %d | MSE Loss %6.2f" % (epoch, sum(losses) / len(losses)))
-        logger.info("Validation - Epoch %d | MAE Loss %6.2f" % (epoch, sum(losses2) / len(losses2)))
-        if sum(losses) / len(losses) < self.best_loss:
-            logger.info("New best MAE loss %6.2f. Saving model." % (sum(losses) / len(losses)))
-            self.best_loss = sum(losses) / len(losses)
-            try:
-                torch.save(self.model.state_dict(), self.save_name)
-            except Exception:
-                raise RuntimeError("Could not save model.")
+            logger.info("Epoch %d | Loss %6.2f" % (epoch, sum(losses) / len(losses)))
+            losses = []
+            losses2 = []
+            for batch_number, input_data in enumerate(validation_loader):
+                x, y = input_data
+                x = x.to(self.device).float()
+                y = y.to(self.device)
+                output = self.model(x)
+                loss = criterion(output, y)
+                lossMAE = criterion2(output, y)
+                losses.append(loss.item())
+                losses2.append(lossMAE.item())
+                if batch_number % 1000 == 0:
+                    logger.info("\tEpoch %d | Batch %d | Loss %6.2f" % (epoch, batch_number, loss.item()))
+                    logger.info(
+                        "\tValidation - Epoch %d | Batch %d | MAE Loss %6.2f" % (epoch, batch_number, lossMAE.item())
+                    )
+            logger.info("Validation - Epoch %d | MSE Loss %6.2f" % (epoch, sum(losses) / len(losses)))
+            logger.info("Validation - Epoch %d | MAE Loss %6.2f" % (epoch, sum(losses2) / len(losses2)))
+            if sum(losses) / len(losses) < self.best_loss:
+                logger.info("New best MAE loss %6.2f. Saving model." % (sum(losses) / len(losses)))
+                self.best_loss = sum(losses) / len(losses)
+                try:
+                    torch.save(self.model.state_dict(), self.save_name)
+                except Exception:
+                    raise RuntimeError("Could not save model.")
         try:
             torch.save(self.model.state_dict(), self.save_name)
         except Exception:
