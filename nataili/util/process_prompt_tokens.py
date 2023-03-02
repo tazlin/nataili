@@ -16,12 +16,11 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import os
-import requests
 
-from nataili.util import load_learned_embed_in_clip, load_learned_embed_in_clip_v2
+from nataili.util import load_learned_embed_in_clip
 
 
-def process_prompt_tokens(prompt_tokens, model, concepts_dir, model_baseline):
+def process_prompt_tokens(prompt_tokens, model, concepts_dir):
     # compviz codebase
     # tokenizer =  model.cond_stage_model.tokenizer
     # text_encoder = model.cond_stage_model.transformer
@@ -30,18 +29,9 @@ def process_prompt_tokens(prompt_tokens, model, concepts_dir, model_baseline):
     # text_encoder = pipe.text_encoder
 
     ext = (".pt", ".bin")
-    remote_embeds_file = "https://raw.githubusercontent.com/Sygil-Dev/nataili-model-reference/main/db_embeds.json"
-    available_embeds = []
-
-    # Fetch the embeds db
-    r = requests.get(remote_embeds_file)
-    embeds = r.json()
-    for embed in embeds:
-        available_embeds.append(embed)
-
     for token_name in prompt_tokens:
         embedding_path = os.path.join(concepts_dir, token_name)
-        if available_embeds[token_name]["baseline"] == model_baseline:
+        if os.path.exists(embedding_path):
             for files in os.listdir(embedding_path):
                 if files.endswith(ext):
                     load_learned_embed_in_clip(
