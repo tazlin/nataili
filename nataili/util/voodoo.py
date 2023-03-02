@@ -142,6 +142,9 @@ def load_diffusers_pipeline_from_plasma(ref, device="cuda"):
     yield pipe
     torch.cuda.empty_cache()
 
+@ray.remote
+def push_to_ray(x):
+    pass
 
 def push_diffusers_pipeline_to_plasma(pipe) -> ray.ObjectRef:
     modules = {}
@@ -151,9 +154,9 @@ def push_diffusers_pipeline_to_plasma(pipe) -> ray.ObjectRef:
             skeleton, weights = extract_tensors(component)
             setattr(pipe, name, skeleton)
             modules[name] = weights
-    ref = ray.put((pipe, modules))
+    arg_ray = ray.put((pipe, modules))
+    ref = push_to_ray.remote(arg_ray)
     return ref
-
 
 def init_ait_module(
     model_name,
