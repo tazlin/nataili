@@ -1,17 +1,14 @@
 """
 This file is part of nataili ("Homepage" = "https://github.com/Sygil-Dev/nataili").
-
 Copyright 2022 hlky and Sygil-Dev
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU Affero General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
-
 This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU Affero General Public License for more details.
-
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
@@ -114,8 +111,7 @@ def load_from_plasma(ref, device="cuda"):
 
 
 def push_model_to_plasma(model: torch.nn.Module) -> ray.ObjectRef:
-    arg_ray = ray.put(extract_tensors(model))
-    ref = edit_ray.remote(arg_ray)
+    ref = ray.put(extract_tensors(model))
     return ref
 
 
@@ -129,7 +125,7 @@ def load_diffusers_pipeline_from_plasma(ref, device="cuda"):
     torch.cuda.empty_cache()
 
 @ray.remote
-def edit_ray(x):
+def push_to_ray(x):
     pass
 
 def push_diffusers_pipeline_to_plasma(pipe) -> ray.ObjectRef:
@@ -141,7 +137,7 @@ def push_diffusers_pipeline_to_plasma(pipe) -> ray.ObjectRef:
             setattr(pipe, name, skeleton)
             modules[name] = weights
     arg_ray = ray.put((pipe, modules))
-    ref = edit_ray.remote(arg_ray)
+    ref = push_to_ray.remote(arg_ray)
     return ref
 
 def init_ait_module(
@@ -153,8 +149,7 @@ def init_ait_module(
 
 
 def push_ait_module(module: Model) -> ray.ObjectRef:
-    arg_ray = ray.put(module)
-    reg = edit_ray.remote(arg_ray)
+    ref = ray.put(module)
     return ref
 
 
