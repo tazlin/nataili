@@ -113,30 +113,15 @@ def load_from_plasma(ref, device="cuda"):
     torch.cuda.empty_cache()
 
 
-def push_model_to_plasma(model: torch.nn.Module, filename="") -> ray.ObjectRef:
-    if not enable_ray_alternative.active:
-        # Store object in ray object store
-        ref = ray.put(extract_tensors(model))
-    else:
-        # Store object directly on disk
-        cachefile = get_model_cache_filename(filename)
-        if have_model_cache(cachefile):
-            return cachefile
-        # Create cache directory if it doesn't already exist
-        if not os.path.isdir(MODEL_CACHE_DIR):
-            os.makedirs(MODEL_CACHE_DIR, exist_ok=True)
-        # Serialise our object
-        with open(cachefile, "wb") as cache:
-            pickle.dump(extract_tensors(model), cache, protocol=pickle.HIGHEST_PROTOCOL)
-        ref = cachefile
-
+def push_model_to_plasma(model: torch.nn.Module) -> ray.ObjectRef:
+    arg_ray = ray.put(extract_tensors(model))
+    ref = edit_ray.remote(arg_ray)
     return ref
 
 
 @contextlib.contextmanager
 def load_diffusers_pipeline_from_plasma(ref, device="cuda"):
-    arg_ray = ray.get(ref)
-    pipe, modules = edit_ray.remote(arg_ray)
+    pipe, modules = ray.get(ref)
     for name, weights in modules.items():
         replace_tensors(getattr(pipe, name), weights, device=device)
     pipe.to(device)
@@ -168,7 +153,8 @@ def init_ait_module(
 
 
 def push_ait_module(module: Model) -> ray.ObjectRef:
-    ref = ray.put(module)
+    arg_ray = ray.put(module)
+    reg = edit_ray.remote(arg_ray)
     return ref
 
 
