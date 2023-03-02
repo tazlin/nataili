@@ -135,7 +135,8 @@ def push_model_to_plasma(model: torch.nn.Module, filename="") -> ray.ObjectRef:
 
 @contextlib.contextmanager
 def load_diffusers_pipeline_from_plasma(ref, device="cuda"):
-    pipe, modules = ray.get(ref)
+    arg_ray = ray.get(ref)
+    pipe, modules = edit_ray.remote(arg_ray)
     for name, weights in modules.items():
         replace_tensors(getattr(pipe, name), weights, device=device)
     pipe.to(device)
@@ -143,7 +144,7 @@ def load_diffusers_pipeline_from_plasma(ref, device="cuda"):
     torch.cuda.empty_cache()
 
 @ray.remote
-def push_to_ray(x):
+def edit_ray(x):
     pass
 
 def push_diffusers_pipeline_to_plasma(pipe) -> ray.ObjectRef:
@@ -155,7 +156,7 @@ def push_diffusers_pipeline_to_plasma(pipe) -> ray.ObjectRef:
             setattr(pipe, name, skeleton)
             modules[name] = weights
     arg_ray = ray.put((pipe, modules))
-    ref = push_to_ray.remote(arg_ray)
+    ref = edit_ray.remote(arg_ray)
     return ref
 
 def init_ait_module(
