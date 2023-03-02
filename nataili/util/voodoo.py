@@ -85,14 +85,14 @@ def load_from_plasma(ref, device="cuda"):
 
 
 def push_model_to_plasma(model: torch.nn.Module) -> ray.ObjectRef:
-    ref = ray.put(extract_tensors(model))
+    arg_ray = ray.put(extract_tensors(model))
+    ref = edit_ray.remote(arg_ray)
     return ref
 
 
 @contextlib.contextmanager
 def load_diffusers_pipeline_from_plasma(ref, device="cuda"):
-    arg_ray = ray.get(ref)
-    pipe, modules = edit_ray.remote(arg_ray)
+    pipe, modules = ray.get(ref)
     for name, weights in modules.items():
         replace_tensors(getattr(pipe, name), weights, device=device)
     pipe.to(device)
@@ -124,7 +124,8 @@ def init_ait_module(
 
 
 def push_ait_module(module: Model) -> ray.ObjectRef:
-    ref = ray.put(module)
+    arg_ray = ray.put(module)
+    reg = edit_ray.remote(arg_ray)
     return ref
 
 
