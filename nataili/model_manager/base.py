@@ -93,6 +93,10 @@ class BaseModelManager:
                     downloads = model_data.get("config", {}).get("download", [])
                     for download in downloads:
                         if download.get("file_name").lower().endswith(".safetensors"):
+                            logger.error(f"{model_name} is not supported by this worker version.")
+                            logger.error(
+                                "You can expect support for this model (and others) in the comfy-backend release soon."
+                            )
                             skip = True
                 if not skip:
                     models[model_name] = model_data
